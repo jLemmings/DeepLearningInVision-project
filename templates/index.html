@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview Image</title>
+</head>
+<body>
+<h1>Image Text Summarizer</h1>
+<form id="imgForm" method="post" enctype="multipart/form-data">
+    <div>
+        <input type="file" accept="image/*" id="file" name="file" onchange="previewImage(event)">
+    </div>
+    <div>
+        <button>Send the file</button>
+    </div>
+</form>
+<h3>Image Preview</h3>
+<div>
+    <img style="max-height: 500px;width:auto;display:none" id="your-image"/>
+</div>
+
+
+<h5>Extracted Text:</h5>
+<p id="text-extracted"></p>
+
+<button onclick="summarizeText()">Summarize Text</button>
+<h5>Summarized Text:</h5>
+<p id="text-summarized"></p>
+
+
+<script>
+    let text = ""
+    let text_sum = ""
+    let previewImage = function (event) {
+        let preview = document.getElementById('your-image');
+        preview.src = URL.createObjectURL(event.target.files[0]);
+        preview.style.display = "block";
+    };
+
+
+    imgForm.onsubmit = async (e) => {
+        e.preventDefault();
+        let response = await fetch('/readimg', {
+            method: 'POST',
+            body: new FormData(imgForm)
+        });
+        text = await response.json();
+        document.getElementById('text-extracted').innerHTML = text
+    };
+
+    async function summarizeText() {
+        let response = await fetch('/readstr', {
+            method: 'POST',
+            body: JSON.stringify(text),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        text_sum = await response.json();
+        document.getElementById('text-summarized').innerHTML = text_sum
+    }
+
+</script>
+</body>
+</html>
